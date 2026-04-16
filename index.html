@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="초보 아티스트를 위한 AI 워크플로우 설계 시스템">
+    <title>ArtistAI Workflow - 초보 아티스트를 위한 AI 협력 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* ===== 네비게이션 ===== */
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        nav .logo span {
+            background: rgba(255,255,255,0.3);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        /* ===== 히어로 섹션 ===== */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            padding: 100px 2rem;
+            text-align: center;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            top: -100px;
+            right: -100px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            bottom: -50px;
+            left: -50px;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        .hero .container {
+            max-width: 800px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            animation: slideInDown 0.8s ease;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            animation: slideInUp 0.8s ease 0.2s both;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            animation: slideInUp 0.8s ease 0.4s both;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(20px); }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== 컨테이너 ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ===== 섹션 ===== */
+        section {
+            padding: 80px 2rem;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #333;
+        }
+
+        section > .container > p {
+            font-size: 1.1rem;
+            text-align: center;
+            color: #666;
+            margin-bottom: 3rem;
+        }
+
+        /* ===== 문제 정의 섹션 ===== */
+        .problem {
+            background: #f8f9fa;
+        }
+
+        .problem-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .problem-card:hover {
+            transform: translateX(5px);
+        }
+
+        .problem-card strong {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        /* ===== 솔루션 섹션 ===== */
+        .solution {
+            background: white;
+        }
+
+        .solution-highlight {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(240, 147, 251, 0.1) 100%);
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            border: 2px solid #667eea;
+        }
+
+        /* ===== 타깃 오디언스 섹션 ===== */
+        .audience {
+            background: white;
+        }
+
+        .audience-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .audience-item {
+            text-align: center;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .audience-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(240, 147, 251, 0.15) 100%);
+        }
+
+        .audience-item .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .audience-item h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ===== 특징 섹션 ===== */
+        .features {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+        }
+
+        .features h2 {
+            color: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-5px);
+        }
+
+        .feature-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* ===== CTA 섹션 ===== */
+        .cta-section {
+            background: white;
+            text-align: center;
+            padding: 60px 2rem;
+        }
+
+        .cta-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        /* ===== 푸터 ===== */
+        footer {
+            background: #222;
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        footer .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        footer h4 {
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        footer ul {
+            list-style: none;
+        }
+
+        footer ul li {
+            margin: 0.5rem 0;
+        }
+
+        footer a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #667eea;
+        }
+
+        footer .footer-bottom {
+            border-top: 1px solid #444;
+            padding-top: 2rem;
+        }
+
+        /* ===== 반응형 ===== */
+        @media (max-width: 768px) {
+            nav ul {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            section h2 {
+                font-size: 2rem;
+            }
+
+            .audience-grid,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 60px 2rem;
+                min-height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav .logo {
+                font-size: 1.2rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            section {
+                padding: 50px 1rem;
+            }
+
+            section h2 {
+                font-size: 1.5rem;
+            }
+
+            .cta-button {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 네비게이션 -->
+    <nav>
+        <div class="container">
+            <div class="logo">
+                🎨 ArtistAI <span>BETA</span>
+            </div>
+            <ul>
+                <li><a href="#problem">문제</a></li>
+                <li><a href="#solution">솔루션</a></li>
+                <li><a href="#audience">대상</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 히어로 섹션 -->
+    <div class="hero">
+        <div class="container">
+            <h1>🚀 AI와 함께 성장하는 아티스트</h1>
+            <p>초보 아티스트의 창작 여정을 10단계 AI 에이전트와 함께 체계적으로 설계하세요</p>
+            <button class="cta-button">지금 시작하기 →</button>
+        </div>
+    </div>
+
+    <!-- 문제 정의 섹션 -->
+    <section class="problem" id="problem">
+        <div class="container">
+            <h2>🤔 초보 아티스트가 겪는 문제</h2>
+            <p>당신도 이런 고민이 있나요?</p>
+            
+            <div class="problem-card">
+                <strong>❌ 창작 과정을 어떻게 체계적으로 관리해야 할까?</strong>
+                <p>아이디어부터 최종 결과물까지 각 단계에서 무엇을 해야 하는지 명확하지 않습니다.</p>
+            </div>
+
+            <div class="problem-card">
+                <strong>❌ AI 도구들을 어디에 어떻게 활용할까?</strong>
+                <p>수많은 AI 도구들이 있지만, 나의 창작 프로세스에 어떻게 통합해야 할지 알 수 없습니다.</p>
+            </div>
+
+            <div class="problem-card">
+                <strong>❌ 전문가 수준의 작품을 만들려면 무엇이 필요한가?</strong>
+                <p>기술 격차, 피드백 부족, 명확한 방향성 없이 창의적 잠재력을 제대로 발휘하지 못합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 솔루션 섹션 -->
+    <section class="solution" id="solution">
+        <div class="container">
+            <h2>💡 ArtistAI 솔루션</h2>
+            <p>각 창작 단계별 역할이 명확한 AI 에이전트와 함께 시작하세요</p>
+            
+            <div class="solution-highlight">
+                <h3>🎯 핵심 개념</h3>
+                <p>초보 아티스트가 <strong>단계별 지침을 따르며 자연스럽게</strong> 전문가 수준의 워크플로우를 체험하고 학습합니다.</p>
+                <p>각 단계마다 특화된 AI 에이전트가 당신의 창작 여정을 가이드합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 타깃 오디언스 섹션 -->
+    <section class="audience" id="audience">
+        <div class="container">
+            <h2>🎯 타깃 오디언스</h2>
+            <p>이런 아티스트들을 위해 설계되었습니다</p>
+            
+            <div class="audience-grid">
+                <div class="audience-item">
+                    <div class="icon">🎵</div>
+                    <h3>음악 아티스트</h3>
+                    <p>음악 프로덕션을 시작한 지 1-2년 내의 작곡가/프로듀서</p>
+                </div>
+
+                <div class="audience-item">
+                    <div class="icon">🎨</div>
+                    <h3>디자이너</h3>
+                    <p>그래픽 디자인, UI/UX 등의 창의적 분야 초보자</p>
+                </div>
+
+                <div class="audience-item">
+                    <div class="icon">🎬</div>
+                    <h3>영상 크리에이터</h3>
+                    <p>영상 제작, 애니메이션을 시작한 신입 크리에이터</p>
+                </div>
+
+                <div class="audience-item">
+                    <div class="icon">✍️</div>
+                    <h3>라이터/작가</h3>
+                    <p>창작 글쓰기, 콘텐츠 제작 초기 단계의 작가</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem; text-align: center;">
+                <h3>공통 특징</h3>
+                <p>✅ AI 도구에 관심이 있지만 어떻게 활용할지 막막한 분</p>
+                <p>✅ 창작 프로세스를 체계화하고 싶은 분</p>
+                <p>✅ 전문가 수준의 작품을 만들고 싶은 열정 있는 분</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 특징 섹션 -->
+    <section class="features">
+        <div class="container">
+            <h2>⚡ ArtistAI의 3가지 핵심 가치</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon">🤝</div>
+                    <h3>단계별 가이드</h3>
+                    <p>각 창작 단계마다 명확한 지침과 맞춤형 AI 협력자가 당신을 인도합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">🚀</div>
+                    <h3>빠른 성장</h3>
+                    <p>체계적인 학습과 반복을 통해 전문가 수준으로 빠르게 성장합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">📚</div>
+                    <h3>지식 자산화</h3>
+                    <p>모든 경험과 학습을 기록하여 다음 프로젝트의 자산으로 활용합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA 섹션 -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>🌟 지금 당신의 창작 여정을 시작하세요</h2>
+            <p>10명의 AI 협력자와 함께 전문가 수준의 창작 워크플로우를 경험하세요</p>
+            <button class="cta-button">무료 시작 →</button>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer>
+        <div class="container">
+            <div>
+                <h4>📌 ArtistAI</h4>
+                <ul>
+                    <li><a href="#">서비스 소개</a></li>
+                    <li><a href="#">파이프라인</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4>💼 회사</h4>
+                <ul>
+                    <li><a href="#">블로그</a></li>
+                    <li><a href="#">채용</a></li>
+                    <li><a href="#">문의하기</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4>🔗 소셜</h4>
+                <ul>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">Discord</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 ArtistAI. All rights reserved. | <a href="#">개인정보처리방침</a> | <a href="#">이용약관</a></p>
+        </div>
+    </footer>
+</body>
+</html>
